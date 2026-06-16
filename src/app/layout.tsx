@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/layout/AppShell";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -44,7 +45,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full bg-background text-foreground">
-        <AppShell>{children}</AppShell>
+        <AuthProvider>
+          <AppShell>{children}</AppShell>
+        </AuthProvider>
       </body>
     </html>
   );

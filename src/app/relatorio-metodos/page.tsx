@@ -7,7 +7,7 @@ import DonutChart from '@/components/dashboard/DonutChart';
 import { formatCurrency } from '@/lib/formatters';
 
 export default function RelatorioMetodosPage() {
-  const { despesas, categorias, metodosPagamento } = useAppData();
+  const { despesas, categorias, metodosPagamento, isLoadingData } = useAppData();
   const [selectedMetodoId, setSelectedMetodoId] = useState<string>('');
 
   const chartData = useMemo(() => {
@@ -37,6 +37,14 @@ export default function RelatorioMetodosPage() {
 
   const activeMetodo = metodosPagamento.find(m => m.id === selectedMetodoId);
   const grandTotal = chartData.reduce((acc, item) => acc + item.total_gasto, 0);
+
+  if (isLoadingData) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col">

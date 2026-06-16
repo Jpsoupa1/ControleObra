@@ -1,9 +1,37 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { HardHat } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { supabase } from '@/lib/supabase';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      router.push('/');
+    }
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8">
@@ -19,7 +47,12 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="space-y-6 mt-8 rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
+        <form onSubmit={handleLogin} className="space-y-6 mt-8 rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
+          {error && (
+            <div className="p-3 text-sm text-red-500 bg-red-500/10 rounded-md">
+              {error}
+            </div>
+          )}
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
@@ -27,6 +60,8 @@ export default function LoginPage() {
                 id="email"
                 name="email"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
                 className="bg-muted/30"
@@ -44,6 +79,8 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
                 required
                 className="bg-muted/30"
@@ -54,9 +91,10 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="flex w-full justify-center rounded-xl bg-amber-500 px-3 py-3 text-sm font-bold text-amber-950 hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 transition-colors"
+            disabled={loading}
+            className="flex w-full justify-center rounded-xl bg-amber-500 px-3 py-3 text-sm font-bold text-amber-950 hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 transition-colors disabled:opacity-50"
           >
-            Entrar
+            {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
 

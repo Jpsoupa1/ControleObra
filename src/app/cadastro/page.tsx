@@ -1,9 +1,52 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { HardHat } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { supabase } from '@/lib/supabase';
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    if (password !== confirmPassword) {
+      setError('As senhas não coincidem.');
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: nome,
+        },
+      },
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      setSuccess(true);
+      setLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md space-y-8">
@@ -19,7 +62,17 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        <form className="space-y-6 mt-8 rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
+        <form onSubmit={handleRegister} className="space-y-6 mt-8 rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
+          {error && (
+            <div className="p-3 text-sm text-red-500 bg-red-500/10 rounded-md">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="p-3 text-sm text-green-500 bg-green-500/10 rounded-md">
+              Cadastro realizado com sucesso! Verifique seu email ou faça login.
+            </div>
+          )}
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="nome">Nome completo</Label>
@@ -27,6 +80,8 @@ export default function RegisterPage() {
                 id="nome"
                 name="nome"
                 type="text"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
                 autoComplete="name"
                 required
                 className="bg-muted/30"
@@ -39,6 +94,8 @@ export default function RegisterPage() {
                 id="email"
                 name="email"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 required
                 className="bg-muted/30"
@@ -51,6 +108,8 @@ export default function RegisterPage() {
                 id="password"
                 name="password"
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
                 required
                 className="bg-muted/30"
@@ -63,6 +122,8 @@ export default function RegisterPage() {
                 id="confirm_password"
                 name="confirm_password"
                 type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 autoComplete="new-password"
                 required
                 className="bg-muted/30"
@@ -73,9 +134,10 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="flex w-full justify-center rounded-xl bg-amber-500 px-3 py-3 text-sm font-bold text-amber-950 hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 transition-colors"
+            disabled={loading}
+            className="flex w-full justify-center rounded-xl bg-amber-500 px-3 py-3 text-sm font-bold text-amber-950 hover:bg-amber-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 transition-colors disabled:opacity-50"
           >
-            Cadastrar
+            {loading ? 'Cadastrando...' : 'Cadastrar'}
           </button>
         </form>
 

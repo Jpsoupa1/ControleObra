@@ -15,7 +15,15 @@ import {
 } from '@/lib/mock-data';
 
 export default function DashboardPage() {
-  const { obra, categorias, metodosPagamento, despesas, addDespesa, updateOrcamentoTotal } = useAppData();
+  const { obra, categorias, metodosPagamento, despesas, addDespesa, updateOrcamentoTotal, isLoadingData } = useAppData();
+
+  if (isLoadingData || !obra) {
+    return (
+      <div className="flex h-full min-h-[50vh] items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div>
+      </div>
+    );
+  }
 
   const resumo = getResumoObra(obra, despesas);
   const gastosPorCategoria = getGastosPorCategoria(categorias, despesas);
